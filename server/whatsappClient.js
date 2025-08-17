@@ -162,7 +162,7 @@ class WhatsAppClientManager {
     this.log('Creating new WhatsApp client...');
 
     try {
-      // Simplified Puppeteer configuration for better stability
+      // Optimized Puppeteer configuration for faster startup
       const puppeteerConfig = {
         headless: true,
         args: [
@@ -174,12 +174,36 @@ class WhatsAppClientManager {
           '--no-first-run',
           '--disable-default-apps',
           '--disable-extensions',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--disable-features=TranslateUI',
+          '--disable-ipc-flooding-protection',
+          '--disable-background-networking',
+          '--disable-sync',
+          '--disable-default-apps',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-preconnect',
+          '--disable-hang-monitor',
+          '--disable-prompt-on-repost',
+          '--disable-domain-reliability',
+          '--disable-component-extensions-with-background-pages',
+          '--no-default-browser-check',
+          '--no-pings',
+          '--mute-audio',
+          '--disable-client-side-phishing-detection',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--disable-features=VizDisplayCompositor'
         ],
-        timeout: 60000, // 1 minute timeout
+        timeout: 30000, // Reduced to 30 seconds
         handleSIGINT: false,
         handleSIGTERM: false,
         executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-        defaultViewport: null,
+        defaultViewport: { width: 1280, height: 720 }, // Set specific viewport for faster rendering
+        ignoreDefaultArgs: ['--disable-extensions'], // Allow some optimizations
       };
 
       this.client = new Client({
@@ -188,6 +212,12 @@ class WhatsAppClientManager {
           dataPath: this.authPath
         }),
         puppeteer: puppeteerConfig,
+        webVersionCache: {
+          type: 'remote',
+          remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2412.54.html',
+        },
+        takeoverOnConflict: true,
+        takeoverTimeoutMs: 10000,
       });
 
       this.setupEventHandlers();

@@ -23,7 +23,7 @@
       drop_msg: 'اسحب وأفلت الملف هنا أو انقر للاختيار',
       format_req: 'تنسيق الأعمدة A-G (صف العناوين 1):',
       batch_title: 'إعدادات الدُفعات · Batch Configuration',
-      batch_size: 'الحد الأقصى لكل دفعة (1-100)',
+      batch_size: 'عدد الرسائل لكل دفعة',
       delay: 'المدة بين الرسائل بالثواني (3-30)',
       send_title: 'الإرسال الجماعي · Bulk Sending',
       btn_start: 'بدء الإرسال',
@@ -48,7 +48,7 @@
       drop_msg: 'Drag & drop your file here or click to choose',
       format_req: 'Columns A-G (Row 1 headers):',
       batch_title: 'Batch Configuration',
-      batch_size: 'Maximum messages per batch (1-100)',
+      batch_size: 'Messages per batch',
       delay: 'Delay between messages (seconds) (3-30)',
       send_title: 'Bulk Sending',
       btn_start: 'Start',
@@ -81,6 +81,34 @@
 
   function hideError() {
     $('#error-message').classList.add('hidden');
+  }
+
+  // Convert Arabic numerals to English numerals
+  function convertArabicToEnglish(text) {
+    if (!text) return text;
+    const arabicNumerals = '٠١٢٣٤٥٦٧٨٩';
+    const englishNumerals = '0123456789';
+
+    return text.replace(/[٠-٩]/g, function(match) {
+      return englishNumerals[arabicNumerals.indexOf(match)];
+    });
+  }
+
+  // Setup number input with Arabic to English conversion
+  function setupNumberInput(inputElement) {
+    inputElement.addEventListener('input', function(e) {
+      const cursorPosition = e.target.selectionStart;
+      const originalValue = e.target.value;
+      const convertedValue = convertArabicToEnglish(originalValue);
+
+      if (originalValue !== convertedValue) {
+        e.target.value = convertedValue;
+        // Restore cursor position
+        e.target.setSelectionRange(cursorPosition, cursorPosition);
+        // Trigger change event to save config
+        e.target.dispatchEvent(new Event('change'));
+      }
+    });
   }
 
   function setStatus(isReady, statusType = null) {
@@ -190,12 +218,23 @@
       // Clear any previous errors
       hideError();
 
-      // Show loading state
+      // Show enhanced loading state
       connectBtn.disabled = true;
-      connectBtn.textContent = lang === 'ar' ? 'جاري الاتصال...' : 'Connecting...';
+      let loadingText = lang === 'ar' ? 'جاري تهيئة واتساب...' : 'Initializing WhatsApp...';
+      connectBtn.textContent = loadingText;
+
+      // Add loading animation
+      let dots = 0;
+      const loadingInterval = setInterval(() => {
+        dots = (dots + 1) % 4;
+        const dotString = '.'.repeat(dots);
+        connectBtn.textContent = loadingText + dotString;
+      }, 500);
 
       const response = await fetch('/api/connect?fresh=1', { method: 'POST' });
       const data = await response.json();
+
+      clearInterval(loadingInterval);
 
       if (!data.ok) {
         throw new Error(data.error || 'Connection failed');
@@ -203,6 +242,7 @@
 
       // Success - QR should appear via socket
       console.log('WhatsApp connection initiated successfully');
+      connectBtn.textContent = lang === 'ar' ? 'انتظار رمز QR...' : 'Waiting for QR...';
 
     } catch (e) {
       console.error('Connect error:', e);
@@ -210,8 +250,8 @@
         'خطأ في الاتصال بواتساب. يرجى المحاولة مرة أخرى.' :
         'WhatsApp connection error. Please try again.';
       showError(errorMsg);
-    } finally {
-      // Restore button state
+
+      // Restore button state on error
       connectBtn.disabled = false;
       connectBtn.textContent = originalText;
     }
@@ -251,6 +291,11 @@
     currentQrVersion = version;
     console.log('New QR received, version:', version);
 
+    // Restore connect button state when QR appears
+    const connectBtn = $('#btn-connect');
+    connectBtn.disabled = false;
+    connectBtn.textContent = lang === 'ar' ? 'ربط واتساب' : 'Connect WhatsApp';
+
     showQrPanel();
     renderQrToCanvas(dataUrl);
     startQrCountdown(expiresAt);
@@ -268,6 +313,15 @@
 
   socket.on('loading', ({ percent, message }) => {
     console.log(`Loading: ${percent}% - ${message}`);
+
+    // Update connect button with loading progress
+    const connectBtn = $('#btn-connect');
+    if (connectBtn.disabled) {
+      const loadingMsg = lang === 'ar' ?
+        `جاري التحميل ${percent}%...` :
+        `Loading ${percent}%...`;
+      connectBtn.textContent = loadingMsg;
+    }
   });
 
   socket.on('error', ({ message }) => {
@@ -353,11 +407,20 @@
   // Batch config persistence
   const bsInput = $('#batch-size');
   const dsInput = $('#delay-seconds');
+
+  // Setup Arabic to English number conversion for both inputs
+  setupNumberInput(bsInput);
+  setupNumberInput(dsInput);
+
   const saved = JSON.parse(localStorage.getItem('config') || '{}');
   if (saved.batchSize) bsInput.value = saved.batchSize;
   if (saved.delaySeconds) dsInput.value = saved.delaySeconds;
+
   [bsInput, dsInput].forEach((el) => el.addEventListener('change', () => {
-    const cfg = { batchSize: Number(bsInput.value)||50, delaySeconds: Number(dsInput.value)||6 };
+    const cfg = {
+      batchSize: Number(convertArabicToEnglish(bsInput.value)) || 50,
+      delaySeconds: Number(convertArabicToEnglish(dsInput.value)) || 6
+    };
     localStorage.setItem('config', JSON.stringify(cfg));
   }));
 
@@ -374,8 +437,14 @@
   btnStart.addEventListener('click', async () => {
     if (!sessionId) return;
     if (!confirm(i18n[lang].confirm_start)) return;
-    const batchSize = Math.max(1, Math.min(100, Number(bsInput.value)||50));
-    const delaySeconds = Math.max(3, Math.min(30, Number(dsInput.value)||6));
+
+    // Convert Arabic numbers and validate
+    const batchSizeValue = convertArabicToEnglish(bsInput.value);
+    const delaySecondsValue = convertArabicToEnglish(dsInput.value);
+
+    const batchSize = Math.max(1, Number(batchSizeValue) || 50);
+    const delaySeconds = Math.max(3, Math.min(30, Number(delaySecondsValue) || 6));
+
     btnStart.disabled = true;
     btnPause.disabled = false;
     btnStop.disabled = false;

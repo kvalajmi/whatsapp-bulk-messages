@@ -299,7 +299,7 @@ function createServer() {
       if (!ds) return;
 
       const { batchSize = 50, delaySeconds = 6, confirm = false, testMode = false } = req.body || {};
-      const bs = Math.max(1, Math.min(100, Number(batchSize) || 50));
+      const bs = Math.max(1, Number(batchSize) || 50); // إزالة الحد الأقصى
       const dsDelay = Math.max(3, Math.min(30, Number(delaySeconds) || 6));
 
       if (!confirm) return res.status(400).json({ ok: false, error: 'Confirmation required to start sending' });

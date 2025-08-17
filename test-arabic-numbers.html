@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>اختبار تحويل الأرقام العربية</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .result {
+            background: #e8f5e8;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #4caf50;
+        }
+        .instructions {
+            background: #fff3cd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ffc107;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 اختبار تحويل الأرقام العربية إلى إنجليزية</h1>
+        
+        <div class="instructions">
+            <h3>📝 تعليمات الاختبار:</h3>
+            <p>• جرب كتابة أرقام عربية مثل: ١٢٣٤٥٦٧٨٩٠</p>
+            <p>• ستتحول فوراً إلى أرقام إنجليزية: 1234567890</p>
+            <p>• يمكنك خلط الأرقام العربية والإنجليزية</p>
+            <p>• مثال: ١٠٠ رسالة = 100 رسالة</p>
+        </div>
+
+        <h3>🔢 اختبار حقل عدد الرسائل لكل دفعة:</h3>
+        <label>عدد الرسائل لكل دفعة:</label>
+        <input type="number" id="batch-size-test" class="test-input" placeholder="جرب كتابة: ١٠٠ أو ٥٠٠" min="1">
+        
+        <div id="batch-result" class="result" style="display: none;">
+            <strong>النتيجة:</strong> <span id="batch-value"></span>
+        </div>
+
+        <h3>⏱️ اختبار حقل المدة بين الرسائل:</h3>
+        <label>المدة بين الرسائل (بالثواني):</label>
+        <input type="number" id="delay-test" class="test-input" placeholder="جرب كتابة: ٥ أو ١٠" min="3" max="30">
+        
+        <div id="delay-result" class="result" style="display: none;">
+            <strong>النتيجة:</strong> <span id="delay-value"></span>
+        </div>
+
+        <h3>📊 أمثلة للاختبار:</h3>
+        <ul>
+            <li>اكتب: ١٠٠ → سيصبح: 100</li>
+            <li>اكتب: ٥٠٠ → سيصبح: 500</li>
+            <li>اكتب: ١٢٣٤ → سيصبح: 1234</li>
+            <li>اكتب: ٥ → سيصبح: 5</li>
+        </ul>
+    </div>
+
+    <script>
+        // Convert Arabic numerals to English numerals
+        function convertArabicToEnglish(text) {
+            if (!text) return text;
+            const arabicNumerals = '٠١٢٣٤٥٦٧٨٩';
+            const englishNumerals = '0123456789';
+            
+            return text.replace(/[٠-٩]/g, function(match) {
+                return englishNumerals[arabicNumerals.indexOf(match)];
+            });
+        }
+
+        // Setup number input with Arabic to English conversion
+        function setupNumberInput(inputElement, resultElement, valueElement) {
+            inputElement.addEventListener('input', function(e) {
+                const cursorPosition = e.target.selectionStart;
+                const originalValue = e.target.value;
+                const convertedValue = convertArabicToEnglish(originalValue);
+                
+                if (originalValue !== convertedValue) {
+                    e.target.value = convertedValue;
+                    // Restore cursor position
+                    e.target.setSelectionRange(cursorPosition, cursorPosition);
+                }
+                
+                // Show result
+                if (convertedValue) {
+                    valueElement.textContent = convertedValue;
+                    resultElement.style.display = 'block';
+                } else {
+                    resultElement.style.display = 'none';
+                }
+            });
+        }
+
+        // Setup test inputs
+        const batchInput = document.getElementById('batch-size-test');
+        const batchResult = document.getElementById('batch-result');
+        const batchValue = document.getElementById('batch-value');
+
+        const delayInput = document.getElementById('delay-test');
+        const delayResult = document.getElementById('delay-result');
+        const delayValue = document.getElementById('delay-value');
+
+        setupNumberInput(batchInput, batchResult, batchValue);
+        setupNumberInput(delayInput, delayResult, delayValue);
+    </script>
+</body>
+</html>
