@@ -29,5 +29,8 @@
   "bugs": {
     "url": "."
   },
-  "homepage": "."
+  "homepage": ".",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
 }
