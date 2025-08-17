@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>واتساب رسائل جماعية - WhatsApp Bulk</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1>واتساب رسائل جماعية · WhatsApp Bulk</h1>
+    <div class="lang-toggle">
+      <button id="lang-ar">العربية</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card" id="wa-connect">
+      <h2 data-i18n="connect_title">ربط واتساب · Connect WhatsApp</h2>
+      <p data-i18n="connect_desc">اضغط على الزر لعرض رمز QR ثم امسح الرمز باستخدام تطبيق واتساب على الهاتف.</p>
+
+      <div class="connect-controls">
+        <button id="btn-connect" class="primary" data-i18n="btn_connect">ربط واتساب</button>
+        <button id="btn-refresh" class="secondary hidden" data-i18n="btn_refresh">تجديد الباركود</button>
+        <button id="btn-disconnect" class="danger hidden" data-i18n="btn_disconnect">تسجيل خروج</button>
+      </div>
+
+      <div id="status" class="status disconnected" data-i18n="status_disconnected">غير متصل</div>
+      <div id="error-message" class="error-message hidden"></div>
+
+      <div id="qr-panel" class="qr-panel hidden">
+        <div class="qr-header">
+          <span data-i18n="qr_expires">ينتهي خلال · Expires in:</span>
+          <span id="qr-countdown" class="countdown">60</span>
+          <span data-i18n="seconds">ثانية · seconds</span>
+        </div>
+        <canvas id="qr-canvas" class="qr-canvas"></canvas>
+        <div id="qr-expired" class="qr-expired hidden">
+          <p data-i18n="qr_expired_msg">انتهت صلاحية رمز QR · QR code expired</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card" id="upload">
+      <h2 data-i18n="upload_title">رفع ملف Excel (.xlsx)</h2>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="file-input" accept=".xlsx" hidden />
+        <p data-i18n="drop_msg">اسحب وأفلت الملف هنا أو انقر للاختيار</p>
+      </div>
+      <div class="hint">
+        <strong data-i18n="format_req">تنسيق الأعمدة A-G (صف العناوين 1):</strong>
+        <ul>
+          <li>A: اسم العميل / Customer Name</li>
+          <li>B: الرقم المدني / National ID</li>
+          <li>C: رقم الهاتف / Phone Number</li>
+          <li>D: رقم الهاتف ٢ / Phone Number 2 (اختياري)</li>
+          <li>E: رقم الهاتف ٣ / Phone Number 3 (اختياري)</li>
+          <li>F: المبلغ المستحق / Amount Due</li>
+          <li>G: النص / Message Text</li>
+        </ul>
+      </div>
+      <div id="upload-error" class="error"></div>
+      <div id="summary" class="summary hidden"></div>
+      <div id="preview" class="preview hidden"></div>
+    </section>
+
+    <section class="card" id="batch">
+      <h2 data-i18n="batch_title">إعدادات الدُفعات · Batch Configuration</h2>
+      <div class="grid">
+        <label>
+          <span data-i18n="batch_size">الحد الأقصى لكل دفعة (1-100)</span>
+          <input type="number" id="batch-size" min="1" max="100" value="50" />
+        </label>
+        <label>
+          <span data-i18n="delay">المدة بين الرسائل بالثواني (3-30)</span>
+          <input type="number" id="delay-seconds" min="3" max="30" value="6" />
+        </label>
+      </div>
+    </section>
+
+    <section class="card" id="sending">
+      <h2 data-i18n="send_title">الإرسال الجماعي · Bulk Sending</h2>
+      <div class="actions">
+        <button id="btn-start" class="primary" disabled data-i18n="btn_start">بدء الإرسال</button>
+        <button id="btn-pause" disabled data-i18n="btn_pause">إيقاف مؤقت</button>
+        <button id="btn-resume" disabled data-i18n="btn_resume">استئناف</button>
+        <button id="btn-stop" disabled data-i18n="btn_stop">إيقاف</button>
+        <button id="btn-report" disabled data-i18n="btn_report">تنزيل تقرير</button>
+      </div>
+      <div class="progress">
+        <div class="bar"><div id="overall-bar" class="bar-inner" style="width:0%"></div></div>
+        <div id="progress-text"></div>
+      </div>
+      <div id="log" class="log"></div>
+    </section>
+  </main>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>
+

@@ -1,0 +1,33 @@
+{
+  "name": "whatsapp-bulk-messaging",
+  "version": "1.0.0",
+  "description": "تطبيق احترافي لإرسال الرسائل الجماعية عبر واتساب مع دعم ملفات Excel - Professional WhatsApp bulk messaging app with Excel integration",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js",
+    "install-deps": "cd server && npm install"
+  },
+  "keywords": [
+    "whatsapp",
+    "bulk-messaging",
+    "excel",
+    "arabic",
+    "kuwait",
+    "messaging",
+    "automation"
+  ],
+  "author": "WhatsApp Bulk Messaging Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "."
+  },
+  "bugs": {
+    "url": "."
+  },
+  "homepage": "."
+}
