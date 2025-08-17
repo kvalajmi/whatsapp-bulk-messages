@@ -40,6 +40,7 @@
     "multer": "^2.0.2",
     "qrcode": "^1.5.4",
     "socket.io": "^4.8.1",
+    "uuid": "^11.1.0",
     "whatsapp-web.js": "^1.32.0"
   }
 }
